@@ -31,6 +31,7 @@ class FeatureTransformTmb(FTModule):
             'tmb.maf',
             type='path',
             show=False,
+            argname_shorten=False,
             desc='The MAF file to calculate the TMB.',
             callback=lambda val, all_vals: (
                 ValueError('A .maf file is required to calculate the TMB.')
@@ -39,13 +40,33 @@ class FeatureTransformTmb(FTModule):
             )
         )
         params.add_param(
+            'tmb.captured',
+            type=str,
+            show=False,
+            argname_shorten=False,
+            desc=('Either the length the captured regions. '
+                  'Required for stratified TMB. `K/M` is supported '
+                  'for kilo or mega bases.'),
+            callback=lambda val, all_vals: (
+                ValueError('Required for stratified TMB.')
+                if not val and all_vals.tmb.method == 'stratified'
+                else int(val[:-1]) * 1_000
+                if val[-1].upper() == 'K'
+                else int(val[:-1]) * 1_000_000
+                if val[-1].upper() == 'M'
+                else int(val)
+            )
+        )
+        params.add_param(
             'tmb.method',
             show=False,
             argname_shorten=False,
             type='choice',
             default='count',
-            choices=['count'],
-            desc='The method to calculate the TMB.'
+            choices=['count', 'stratified'],
+            desc=('The method to calculate the TMB. '
+                  'Stratified TMB requires the capture region and will be '
+                  'stratified per megabase.')
         )
 
     @ft_modules.impl
