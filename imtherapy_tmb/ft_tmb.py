@@ -78,7 +78,7 @@ def nonsyn(maf, outfile):
         dw.writerow(dict((fn,fn) for fn in fieldnames))
         for sample, t in tmb.items():
             if method == 'stratified':
-                t = float(t) / float(captured)
+                t = float(t) * 1_000_000.0 / float(captured)
             dw.writerow({'Sample': sample, 'TMB': str(t)})
 
 nonsyn(infile, outfile)
