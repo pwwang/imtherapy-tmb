@@ -50,6 +50,8 @@ class FeatureTransformTmb(FTModule):
             callback=lambda val, all_vals: (
                 ValueError('Required for stratified TMB.')
                 if not val and all_vals.tmb.method == 'stratified'
+                else None
+                if not val
                 else int(val[:-1]) * 1_000
                 if val[-1].upper() == 'K'
                 else int(val[:-1]) * 1_000_000
