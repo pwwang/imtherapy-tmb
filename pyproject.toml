@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "imtherapy-tmb"
+name = "imtherapy-mut"
 version = "0.0.0"
-description = "Tumor mutation burden feature transformation module for imtherapy"
+description = "Mutation related feature transformation module for imtherapy"
 authors = ["pwwang <pwwang@pwwang.com>"]
 license = "MIT"
 
@@ -17,4 +17,4 @@ requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry.plugins.imtherapy_feature_transform]
-tmb = "imtherapy_tmb:FeatureTransformTmb"
+mut = "imtherapy_mut:FeatureTransformMut"

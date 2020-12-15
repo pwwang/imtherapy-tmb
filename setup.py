@@ -14,16 +14,16 @@ readme = ''
 
 setup(
     long_description=readme,
-    name='imtherapy-tmb',
+    name='imtherapy-mut',
     version='0.0.0',
-    description='Tumor mutation burden feature transformation module for imtherapy',
+    description='Mutation related feature transformation module for imtherapy',
     python_requires='==3.*,>=3.7.0',
     author='pwwang',
     author_email='pwwang@pwwang.com',
     license='MIT',
-    entry_points={"imtherapy_feature_transform": ["tmb = imtherapy_tmb:FeatureTransformTmb"]},
-    packages=['imtherapy_tmb'],
+    entry_points={"imtherapy_feature_transform": ["mut = imtherapy_mut:FeatureTransformMut"]},
+    packages=['imtherapy_mut'],
     package_dir={"": "."},
     package_data={},
-    install_requires=['imtherapy==0.*,>=0.0.0', 'pipen==0.*,>=0.0.2'],
+    install_requires=['imtherapy', 'pipen'],
 )
