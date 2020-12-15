@@ -47,7 +47,7 @@ class FeatureTransformMut(FTModule):
             type=str,
             show=False,
             argname_shorten=False,
-            desc=('The length the captured regions. '
+            desc=('The length of the captured regions. '
                   'If provided, tumor mutation burden will be stratified. '
                   '`K/M` is supported for kilo or mega bases.'),
             callback=lambda val: (
@@ -67,16 +67,7 @@ class FeatureTransformMut(FTModule):
             argname_shorten=False,
             desc=('The column of the samples. If mutfile is a MAF file, '
                   '`Tumor_Sample_Barcode` will be used. Otherwise, first '
-                  'column will be used. Could be 0-based index.'),
-            callback=lambda val: (
-                None
-                if not val
-                else int(val[:-1]) * 1_000
-                if val[-1].upper() == 'K'
-                else int(val[:-1]) * 1_000_000
-                if val[-1].upper() == 'M'
-                else int(val)
-            )
+                  'column will be used. Could be 0-based index.')
         )
         params.add_param(
             'mut.classcol',
@@ -92,16 +83,7 @@ class FeatureTransformMut(FTModule):
                   '- Otherwise, it should have `nonsyn` to indicate nonsyn '
                   'mutations.'
                   '- If this is not specified, all mutations will be treated '
-                  'as nonsyn mutations.'),
-            callback=lambda val: (
-                None
-                if not val
-                else int(val[:-1]) * 1_000
-                if val[-1].upper() == 'K'
-                else int(val[:-1]) * 1_000_000
-                if val[-1].upper() == 'M'
-                else int(val)
-            )
+                  'as nonsyn mutations.')
         )
         params.add_param(
             'mut.feats',

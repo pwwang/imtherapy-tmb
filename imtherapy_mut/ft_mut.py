@@ -1,6 +1,5 @@
 import csv
 from collections import defaultdict
-from os import spawnl
 
 infile  = {{ in.infile | str | repr }}
 outfile = {{ out.outfile | str | repr }}
