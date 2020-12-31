@@ -11,6 +11,9 @@ samplecol = {{ args.samplecol | isinstance: str ?
 classcol = {{ args.classcol | isinstance: str ?
                                 lambda x: int(x) if x.isdigit() else x !
                             | repr }}
+genecol = {{ args.genecol | isinstance: str ?
+                                lambda x: int(x) if x.isdigit() else x !
+                            | repr }}
 
 PPINGS = dict(
     # oncotator MAFs
@@ -60,9 +63,9 @@ MAF_NONSYN = set([
 
 IS_MAF = infile.endswith('.maf')
 
-def get_colnames(samcol, clscol):
-    if isinstance(samcol, str) and isinstance(clscol):
-        return samcol, clscol
+def get_colnames(samcol, clscol, gcol):
+    if isinstance(samcol, str) and isinstance(clscol, str) and isinstance(gcol, str):
+        return samcol, clscol, gcol
 
     if IS_MAF and samcol is None:
         samcol = 'Tumor_Sample_Barcode'
@@ -72,6 +75,9 @@ def get_colnames(samcol, clscol):
     if IS_MAF and clscol is None:
         clscol = 'Variant_Classification'
 
+    if IS_MAF and gcol is None:
+        gcol = 'Hugo_Symbol'
+
     with open(infile) as fp:
         reader = csv.DictReader(filter(lambda row: row[0]!='#', fp),
                                 delimiter='\t')
@@ -79,8 +85,12 @@ def get_colnames(samcol, clscol):
             samcol = reader.fieldnames[samcol]
         if isinstance(clscol, int):
             clscol = reader.fieldnames[clscol]
+        if isinstance(gcol, int):
+            clscol = reader.fieldnames[gcol]
 
-    return samcol, clscol
+    return samcol, clscol, gcol
+
+samplecol, classcol, genecol = get_colnames(samplecol, classcol, genecol)
 
 def get_samples(samcol):
     samples = []
@@ -93,7 +103,8 @@ def get_samples(samcol):
                 samples.append(row[samcol])
     return samples
 
-def tmb(samcol, clscol):
+def tmb(feat):
+    samcol, clscol = samplecol, classcol
     ret = defaultdict(lambda: 0)
 
     with open(infile) as fp:
@@ -130,20 +141,52 @@ def tmb(samcol, clscol):
         ret = {key: float(val)/float(captured) for key, val in ret.items()}
     return ret
 
+def gmut(feat):
+    gene = feat[5:]
+    samcol, gcol = samplecol, genecol
+    ret = defaultdict(lambda: lambda: 0)
+
+    with open(infile) as fp:
+        reader = csv.DictReader(filter(lambda row: row[0]!='#', fp),
+                                delimiter='\t')
+
+        for row in reader:
+            sample = row[samcol]
+            if row[gcol] == gene:
+                ret[sample] += 1
+    return ret
+
+def bgmut(feat):
+    ret = gmut(feat[1:])
+    return {sample: str(bool(count)).upper()
+            for sample, count in ret.items()}
+
 FEAT_FUNCS = {
-    'tmb': tmb
+    'tmb': tmb,
+    'gmut': gmut,
+    'bgmut': bgmut
 }
 
 if __name__ == "__main__":
-    samcol, clscol = get_colnames(samplecol, classcol)
-    samples = get_samples(samcol)
+    samples = get_samples(samplecol)
 
     with open(outfile, 'w') as fout:
-        fout.write('\t'.join([""] + [feat.upper() for feat in features]) + '\n')
+        fout.write('\t'.join([""] + [
+            f'{feat[6:]}_mut'
+            if feat.startswith('bgmut-')
+            else f'{feat[5:]}_mut'
+            if feat.startswith('gmut-')
+            else feat.upper().replace('-', '_')
+            for feat in features
+        ]) + '\n')
         for sample in samples:
             featvals = []
             for feat in features:
                 featvals.append(
-                    str(FEAT_FUNCS[feat](samcol, clscol).get(sample, 'NA'))
+                    str(FEAT_FUNCS[feat](feat).get(sample, 'NA'))
+                    if 'gmut' not in feat
+                    else FEAT_FUNCS['gmut'](feat)
+                    if feat.startswith('gmut-')
+                    else FEAT_FUNCS['bgmut'](feat)
                 )
             fout.write('\t'.join([sample] + featvals) + '\n')

@@ -86,12 +86,22 @@ class FeatureTransformMut(FTModule):
                   'as nonsyn mutations.')
         )
         params.add_param(
+            'mut.genecol',
+            type=str,
+            show=False,
+            argname_shorten=False,
+            desc='Column of the genes'
+        )
+        params.add_param(
             'mut.feats',
             show=False,
             argname_shorten=False,
             type=list,
             default=['tmb'],
-            desc=('The features to be calculated from the mutfile.')
+            desc=('The features to be calculated from the mutfile.',
+                  '* tmb: Tumor mutation burden',
+                  '* gmut-<gene>: Individual gene mutation counts',
+                  '* bgmut-<bene>: Binary individual gene mutation')
         )
 
     @ft_modules.impl
@@ -101,3 +111,4 @@ class FeatureTransformMut(FTModule):
         self.process.args['captured'] = args.mut.captured
         self.process.args['samplecol'] = args.mut.samplecol
         self.process.args['classcol'] = args.mut.classcol
+        self.process.args['genecol'] = args.mut.genecol
